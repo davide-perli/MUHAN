@@ -77,6 +77,7 @@ POWER             = 'POWER'
 SQUARE_ROOT       = 'SQUARE ROOT'
 FACTORIAL         = 'FACTORIAL'
 PROCENT           = 'PROCENT'          # !!!!!!!!! Atentie, asta scoate cat la suta reprezinta un numar dintr-un alt numar, nu restul, ca nu suntem fatalai
+LOGARITHM         = 'LOGARITHM'
 LEFT_PARENTHESiS  = 'LEFT PARENTHESIS'
 RIGHT_PARENTHESiS = 'RIGHT PARENTHESIS'
 EOF               = 'EOF'
@@ -155,6 +156,15 @@ class Input_Read_And_Breakdown:
             elif self.current_character == '%':             #identific procentul, cat  la suta reprezinta un numar dintr-un alt numar, NU REST
                 data_types_list.append(Data_Types(PROCENT, pos_start = self.position))
                 self.next_character()
+
+            elif self.current_character == 'l' or self.current_character == 'L':       #identific flogaritmul
+                data_types_list.append(Data_Types(LOGARITHM, pos_start = self.position))
+                self.next_character()
+
+            elif self.current_character == ',':
+                data_types_list.append(Data_Types(',', pos_start=self.position))
+                self.next_character()
+
 
             elif self.current_character == '(':       #identific paranteza stanga
                 data_types_list.append(Data_Types(LEFT_PARENTHESiS, pos_start = self.position))
@@ -273,6 +283,23 @@ class Parser:
     def factor(self):
         res = ParseResult()
         tok = self.current_data_type
+        if tok.type == LOGARITHM:
+            res.register(self.advance())  # Advance past 'l' or 'L'
+            if self.current_data_type.type == LEFT_PARENTHESiS:
+                res.register(self.advance())  # Advance past '('
+                left_factor = res.register(self.factor())  # The number for which we want the log
+                if res.error: return res
+                
+                if self.current_data_type.type == ',':
+                    res.register(self.advance())  # Advance past ','
+                    right_factor = res.register(self.factor())  # The base of the logarithm
+                    if res.error: return res
+                    
+                    if self.current_data_type.type == RIGHT_PARENTHESiS:
+                        res.register(self.advance())  # Advance past ')'
+                        return res.succes(NodOperatoriBinari(left_factor, tok, right_factor))
+                        
+                return res.failure(InvalidStntaxError(tok.pos_start, tok.pos_end, "Expected base for logarithm"))
 
         if tok.type in (PLUS, MINUS):  # Handle unary operators
             res.register(self.advance())
@@ -302,6 +329,7 @@ class Parser:
             return res.failure(InvalidStntaxError(
                 tok.pos_start, tok.pos_end, "Expected ')'"
             ))
+
 
         elif tok.type == SQUARE_ROOT:  # Handle square root
             res.register(self.advance())
@@ -391,6 +419,9 @@ class Interpreter:
             if right == 0:
                 raise Exception("Cannot calculate percentage with zero divisor! Sentance: Oil up and throw to Diddy")
             return (left / right) * 100
+        elif op_type == LOGARITHM:
+            return self.custom_logarithm(left, right)
+        
 
         raise Exception(f'Unknown operator type: {op_type}')
 
@@ -398,6 +429,27 @@ class Interpreter:
         if n == 0 or n == 1:
             return 1
         return n * self.factorial(n - 1)
+
+
+    def custom_logarithm(self, value, base):
+        if value <= 0:
+            raise Exception("Logarithm argument must be greater than zero.")
+        if base <= 0 or base == 1:
+            raise Exception("Logarithm base must be greater than zero and not equal to one.")
+        
+        log_value = 0
+        current_value = 1
+        
+        # Use a more accurate method for calculating logarithm
+        while current_value < value:
+            current_value *= base
+            log_value += 1
+        
+        # Adjusting for overshoot can be improved with more precision if needed.
+        if current_value > value:
+            log_value -= (current_value - value) / current_value
+        
+        return log_value
 
 
 #-----------------------------------------------------------------------------#
