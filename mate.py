@@ -403,21 +403,21 @@ class Interpreter:
             return left * right
         elif op_type == DIVISION:
             if right == 0:
-                raise Exception("Division by zero is illegal sentance: Oil up and throw to Diddy")
+                raise Exception("Division by zero is illegal!")
             return left / right
         elif op_type == POWER:
             return left ** right
         elif op_type == SQUARE_ROOT:
             if right < 0:
-                raise Exception("Cannot take the square root of a negative number! Sentance: Oil up and throw to Diddy")
+                raise Exception("Cannot take the square root of a negative number!")
             return right ** 0.5
         elif op_type == FACTORIAL:
             if not isinstance(left, int) or left < 0:
-                raise Exception("Factorial is only defined for non-negative integers! Sentance: Oil up and throw to Diddy")
+                raise Exception("Factorial is only defined for non-negative integers!")
             return self.factorial(left)
         elif op_type == PROCENT:
             if right == 0:
-                raise Exception("Cannot calculate percentage with zero divisor! Sentance: Oil up and throw to Diddy")
+                raise Exception("Cannot calculate percentage with zero divisor!")
             return (left / right) * 100
         elif op_type == LOGARITHM:
             return self.custom_logarithm(left, right)
