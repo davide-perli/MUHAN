@@ -157,7 +157,7 @@ class Input_Read_And_Breakdown:
                 data_types_list.append(Data_Types(PROCENT, pos_start = self.position))
                 self.next_character()
 
-            elif self.current_character == 'l' or self.current_character == 'L':       #identific flogaritmul
+            elif self.current_character == 'l' or self.current_character == 'L':       #identific logaritmul
                 data_types_list.append(Data_Types(LOGARITHM, pos_start = self.position))
                 self.next_character()
 
@@ -440,12 +440,12 @@ class Interpreter:
         log_value = 0
         current_value = 1
         
-        # Use a more accurate method for calculating logarithm
+  
         while current_value < value:
             current_value *= base
             log_value += 1
         
-        # Adjusting for overshoot can be improved with more precision if needed.
+       
         if current_value > value:
             log_value -= (current_value - value) / current_value
         
